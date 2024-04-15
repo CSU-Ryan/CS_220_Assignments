@@ -51,7 +51,7 @@ END DFS
 """
 
 import sys
-
+from collections import deque
 
 
 def read(filename):
@@ -102,7 +102,17 @@ def breadth_first_search(graph, root):
     """
     breadth first search the graph from root
     """
-    pass
+    distances = {root: 0}
+    queue = deque([(root, 0)])
+
+    while queue:
+        current, distance = queue.popleft()
+        for adjacent in graph[current][1]:
+            if adjacent not in distances:
+                distances[adjacent] = distance + 1
+                queue.append((adjacent, distance + 1))
+
+    return list(zip(distances.keys(), distances.values()))
 
 
 '''
@@ -112,9 +122,28 @@ def breadth_first_search(graph, root):
 
 def depth_first_search(graph, root):
     """
-    depth first search gr from r for cycles
+    depth first search graph from root for cycles
     """
-    pass
+    for adjacent in graph[root][1]:
+        if depth_recursion(root, adjacent, graph[adjacent][1], ""):
+            return True
+
+    return False
+
+
+def depth_recursion(root, current, adjacents, found):
+    if current in found:
+        return True
+
+    if len(graph) <= len(found):
+        return False
+
+    for adjacent in adjacents:
+        if adjacent not in found:
+            if depth_recursion(root, adjacent, graph[adjacent][1], found + adjacent):
+                return True
+
+    return False
 
 
 if __name__ == "__main__":
@@ -127,7 +156,7 @@ if __name__ == "__main__":
     print_graph(graph)
     print("Root node:", root)
     graph[root] = ('black', graph[root][1])
-    q = breadth_first_search(graph, [(root, 0)])
+    q = breadth_first_search(graph, root)
     print("BFS queue: (node name, distance) pairs")
     print(q)
     print("END BFS")
@@ -137,8 +166,8 @@ if __name__ == "__main__":
     paint_white(graph)
     print_graph(graph)
     print("Root node", root)
-    cyclic = depth_first_search(graph, root)
-    if cyclic:
+    is_cyclic = depth_first_search(graph, root)
+    if is_cyclic:
         print("graph with root", root, "is cyclic")
     else:
         print("graph with root", root, "is not cyclic")
